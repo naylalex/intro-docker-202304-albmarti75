@@ -1,0 +1,16 @@
+FROM ubuntu
+
+RUN mkdir /docker
+WORKDIR /docker
+
+COPY pom.xml .
+COPY src ./src
+
+RUN apt-get update
+RUN apt-get install maven openjdk-8-jdk --yes
+
+RUN mvn verify
+
+RUN java -Xmx8m -Xms8m -jar ./target/words.jar
+
+EXPOSE 8080
