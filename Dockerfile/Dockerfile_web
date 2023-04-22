@@ -5,3 +5,4 @@ COPY dispatcher.go .
 RUN go build dispatcher.go
 
 CMD ["./dispatcher"]
+
