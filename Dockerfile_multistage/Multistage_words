@@ -1,0 +1,27 @@
+FROM ubuntu as final
+FROM ubuntu as build
+RUN mkdir /docker
+WORKDIR /docker
+
+COPY pom.xml .
+COPY src ./src
+
+RUN apt-get update
+RUN apt-get install maven openjdk-8-jdk --yes
+
+RUN mvn verify
+RUN apt remove maven --yes
+
+FROM final
+RUN apt-get update
+RUN apt-get install openjdk-8-jdk --yes
+RUN mkdir /docker
+WORKDIR /docker
+COPY --from=build /docker .
+
+ENTRYPOINT ["java","-Xmx8m","-Xms8m","-jar","./target/words.jar"]
+EXPOSE 8080
+
+#REPOSITORY    TAG            IMAGE ID       CREATED          SIZE
+#multi_words   latest         57b7aa05a937   11 minutes ago   638MB
+#words         latest         47b80f67a870   6 hours ago      857MB

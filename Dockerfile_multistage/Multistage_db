@@ -1,0 +1,16 @@
+From postgres as final
+FROM postgres as build
+
+RUN mkdir /db
+WORKDIR /db
+COPY words.sql /docker-entrypoint-initdb.d/words.sql
+
+FROM final
+RUN mkdir /db
+WORKDIR /db
+COPY --from=build /docker-entrypoint-initdb.d/words.sql /docker-entrypoint-initdb.d/words.sql
+ENV POSTGRES_HOST_AUTH_METHOD=trust
+
+#REPOSITORY    TAG       IMAGE ID       CREATED          SIZE
+#multi_db      latest    a3d04f7a9861   3 minutes ago    379MB
+#db            latest    21923b04943c   8 minutes ago    379MB

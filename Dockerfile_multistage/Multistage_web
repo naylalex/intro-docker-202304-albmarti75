@@ -1,0 +1,17 @@
+FROM golang:1.20 as final
+FROM golang:1.20 as build
+
+RUN mkdir /web
+WORKDIR /web
+COPY dispatcher.go .
+RUN go build dispatcher.go
+
+FROM final
+RUN mkdir /web
+WORKDIR /web
+COPY --from=build /web .
+CMD ["./dispatcher"]
+
+#REPOSITORY    TAG            IMAGE ID       CREATED          SIZE
+#web           latest         326a2c5f1a23   37 seconds ago   847MB
+#multi_web     latest         0bf9bd993efd   2 minutes ago    785MB
