@@ -1,0 +1,50 @@
+version: "3.7"
+
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./db/.words.sql:/docker-entrypoint-initdb.d/words.sql
+      - db-datos:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    restart: "on-failure"
+  web_build:
+    build: web
+    volumes:
+      - web_datos:/web
+    depends_on: 
+      - db
+  web_run:
+    image: gcr.io/distroless/base-debian11
+    volumes:
+      - web_datos:/web
+    command: ./web/dispatcher
+    depends_on: 
+      - db
+      - web_build 
+    restart: "on-failure"
+  words_build:
+    build: words
+    ports: 
+      - 8080
+    volumes:
+      - words_datos:/docker
+    depends_on:
+      - web_run
+  words_run: 
+    image: ibmjava:jre
+    ports:
+      - 8080
+    command: java -Xmx8m -Xms8m -jar /docker/target/words.jar
+    volumes:
+      - words_datos:/docker
+    depends_on:
+      - web_run
+      - words_build
+    restart: "on-failure"
+
+volumes:
+  db-datos:   #Volumen para datos de la Base de Datos
+  words_datos:  #Volumen para datos de la App
+  web_datos:  #Volumen para datos de la web
